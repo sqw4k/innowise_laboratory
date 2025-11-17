@@ -41,5 +41,5 @@ if hobbies_amount == 0:
 else:
     print(f"Favourite Hobbies({hobbies_amount}): ")
     for hobby in user_profile["Favourite hobbies"]:
-        print(f"{hobby}")
+        print(f"- {hobby}")
     print("---")
