@@ -1,137 +1,226 @@
-def find_student(list_of_students: list[dict], current_student_name: str) -> dict | None:
-    result: dict | None = next((existing_student for existing_student in list_of_students
-                   if existing_student["student_name"] == current_student_name.lower()), None)
-    return result
+"""
+Student Grade Analyzer Program
+Manages and analyzes student grades with menu interface.
+"""
 
-def find_student_index(list_of_students: list[dict], current_student_data: dict) -> int:
-    i: int
-    for i, existing_student_data in enumerate(list_of_students):
-        if existing_student_data == current_student_data:
-            return i
+
+def find_student(students_list: list[dict], student_name: str) -> dict | None:
+    """Find student by name in the list."""
+    return next(
+        (student for student in students_list
+         if student["student_name"] == student_name.lower()),
+        None
+    )
+
+
+def find_student_index(students_list: list[dict], student_data: dict) -> int:
+    """Find student index in the list."""
+    for index, student in enumerate(students_list):
+        if student == student_data:
+            return index
     return -1
 
-def new_student(list_of_students: list[dict]) -> list[dict] | None:
-    student_name: str = input("Enter student name: ")
-    if find_student(list_of_students, student_name):
-        student_data: dict = {
-            "student_name": student_name.lower(),
-            "student_grade": list,
-        }
-        return list_of_students.append(student_data)
-    else:
+
+def new_student(students_list: list[dict]) -> None:
+    """Add a new student to the list."""
+    student_name = input("Enter student name: ").strip()
+
+    if not student_name:
+        print("Student name cannot be empty!")
+        return
+
+    if find_student(students_list, student_name):
         print("Student already exists!")
-        return None
+        return
 
-def add_grades(list_of_grades: list[dict]) -> list[dict] | None:
-    student_name: str = input("Enter student name: ")
-    current_student_data: dict = find_student(list_of_grades, student_name)
-    if current_student_data:
-        while True:
-            grade: str = input("Enter a grade (or 'done' to finish): ")
-            if grade == "done":
-                return list_of_grades
-            try:
-                current_grade: int = int(grade)
-                list_of_grades[find_student_index(list_of_grades, current_student_data)]["student_grade"].append(current_grade)
-            except ValueError:
-                print("Type a valid grade with integers!")
-                return list_of_grades
-    else:
+    student_data = {
+        "student_name": student_name.lower(),
+        "student_grades": [],
+    }
+    students_list.append(student_data)
+    print(f"Student '{student_name}' added successfully!")
+
+
+def add_grades(students_list: list[dict]) -> None:
+    """Add grades for an existing student."""
+    student_name = input("Enter student name: ").strip()
+    student_data = find_student(students_list, student_name)
+
+    if not student_data:
         print("Student doesn't exist!")
-        return None
+        return
 
-def max_avg_grade(list_of_grades: list[dict]) -> float | None:
-    max_student = max(list_of_grades, key=lambda x: x["student_avg"])
-    try:
-        max_avg: float = max_student["student_avg"]
-        return max_avg
-    except ValueError:
-        print("{Your students have no grades!")
-        return None
+    print(f"Adding grades for {student_name}:")
 
-def max_avg_student(list_of_grades: list[dict]) -> str | None:
-    max_student = max(list_of_grades, key=lambda x: x["student_avg"])
-    try:
-        max_avg: float = max_student["student_avg"]
-        return max_student["student_name"]
-    except ValueError:
-        print("{Your students have no grades!")
-        return None
+    while True:
+        grade_input = input("Enter a grade (0-100) or 'done' to finish: ").strip()
 
-def min_avg_grade(list_of_grades: list[dict]) -> float | None:
-    min_student = min(list_of_grades, key=lambda x: x["student_avg"])
-    try:
-        min_avg: float = min_student["student_avg"]
-        return min_avg
-    except ValueError:
-        print("{Your students have no grades!")
-        return None
+        if grade_input.lower() == 'done':
+            break
 
-def overall_grade(list_of_grades: list[dict]) -> float | None:
-    summ: float = 0
-    for avg_grade in list_of_grades:
-        summ += avg_grade["student_avg"]
-    try:
-        overall_grade: float = summ / len(list_of_grades) + 1
-        return overall_grade
-    except ZeroDivisionError:
-        return None
-
-def avg_grades(list_of_avgs: list[dict]) -> list[dict]:
-    for existing_student_data in list_of_avgs:
-        index: int = find_student_index(list_of_avgs, existing_student_data)
-        list_of_avgs[index]["student_avg"]: str = "N/A"
-        summ: int = 0
-        quantity: int = 0
-        for grade in existing_student_data["student_grade"]:
-            summ = summ + list_of_avgs[index]["student_grade"][grade]
-            quantity = quantity + 1
         try:
-            list_of_avgs[index]["student_avg"]: float = (summ / quantity)
-            print(f"{existing_student_data['student_name'].capitalize()}'s average grade is {existing_student_data['student_avg']}")
-        except ZeroDivisionError:
-            print(f"{existing_student_data['student_name'].capitalize()}'s average grade is N/A")
-    print(f"------------------------"
-          f"Max Average: {max_avg_grade(list_of_avgs)}"
-          f"Min Average: {min_avg_grade(list_of_avgs)}"
-          f"Overall Average: {overall_grade(list_of_avgs)}")
+            grade = int(grade_input)
+            if 0 <= grade <= 100:
+                student_data["student_grades"].append(grade)
+                print(f"Grade {grade} added.")
+            else:
+                print("Grade must be between 0 and 100!")
+        except ValueError:
+            print("Please enter a valid number!")
 
 
+def calculate_average(grades: list) -> float | str:
+    """Calculate average of grades."""
+    if not grades:
+        return "N/A"
+    return sum(grades) / len(grades)
+
+
+def max_average_grade(students_list: list[dict]) -> float | None:
+    """Find maximum average grade."""
+    students_with_grades = [
+        s for s in students_list
+        if s.get("student_grades") and
+           isinstance(calculate_average(s["student_grades"]), float)
+    ]
+
+    if not students_with_grades:
+        return None
+
+    return max(calculate_average(s["student_grades"]) for s in students_with_grades)
+
+
+def max_average_student(students_list: list[dict]) -> tuple[str, float] | None:
+    """Find student with highest average grade."""
+    students_with_grades = [
+        s for s in students_list
+        if s.get("student_grades") and
+           isinstance(calculate_average(s["student_grades"]), float)
+    ]
+
+    if not students_with_grades:
+        return None
+
+    top_student = max(
+        students_with_grades,
+        key=lambda x: calculate_average(x["student_grades"])
+    )
+
+    return (top_student["student_name"],
+            calculate_average(top_student["student_grades"]))
+
+
+def min_average_grade(students_list: list[dict]) -> float | None:
+    """Find minimum average grade."""
+    students_with_grades = [
+        s for s in students_list
+        if s.get("student_grades") and
+           isinstance(calculate_average(s["student_grades"]), float)
+    ]
+
+    if not students_with_grades:
+        return None
+
+    return min(calculate_average(s["student_grades"]) for s in students_with_grades)
+
+
+def overall_average_grade(students_list: list[dict]) -> float | None:
+    """Calculate overall average grade."""
+    all_grades = []
+    for student in students_list:
+        all_grades.extend(student.get("student_grades", []))
+
+    if not all_grades:
+        return None
+
+    return sum(all_grades) / len(all_grades)
+
+
+def generate_report(students_list: list[dict]) -> None:
+    """Generate full report for all students."""
+    if not students_list:
+        print("No students available!")
+        return
+
+    print("\n--- Student Report ---")
+
+    # Calculate and display individual averages
+    for student in students_list:
+        avg = calculate_average(student["student_grades"])
+        name = student["student_name"].capitalize()
+
+        if avg == "N/A":
+            print(f"{name}'s average grade is N/A.")
+        else:
+            print(f"{name}'s average grade is {avg:.1f}.")
+
+    # Display summary statistics
+    print("---")
+
+    max_avg = max_average_grade(students_list)
+    min_avg = min_average_grade(students_list)
+    overall_avg = overall_average_grade(students_list)
+
+    print(f"Max Average: {max_avg if max_avg is not None else 'N/A'}")
+    print(f"Min Average: {min_avg if min_avg is not None else 'N/A'}")
+    print(f"Overall Average: {overall_avg if overall_avg is not None else 'N/A'}")
 
 
 def main():
-    students: list[dict] = []
-    print("--------Student Grade Analyzer-----------"
-          "1. Add a new student"
-          "2. Add grades for a student"
-          "3. Generate a full report"
-          "4. Find the top student"
-          "5. Exit the program")
+    """Main program function."""
+    students = []
+
+    menu = """
+--- Student Grade Analyzer ---
+1. Add a new student
+2. Add grades for a student
+3. Generate a full report
+4. Find the top student
+5. Exit program
+----------------------------"""
+
+    print(menu)
+
     while True:
-        label = input("Enter your choice: ")
         try:
-            label = int(label)
+            choice = input("\nEnter your choice: ").strip()
+
+            if not choice:
+                continue
+
+            choice = int(choice)
+
+            match choice:
+                case 1:
+                    new_student(students)
+
+                case 2:
+                    add_grades(students)
+
+                case 3:
+                    generate_report(students)
+
+                case 4:
+                    top_student_data = max_average_student(students)
+                    if top_student_data:
+                        name, grade = top_student_data
+                        print(
+                            f"The student with the highest average is {name.capitalize()} with a grade of {grade:.1f}.")
+                    else:
+                        print("No students with grades available!")
+
+                case 5:
+                    print("Exiting program.")
+                    break
+
+                case _:
+                    print("Invalid choice! Please enter 1-5.")
+
         except ValueError:
-            print("Enter an int from 1 to 5!")
-            continue
-        if not 1 <= label <= 5:
-            print("Invalid choice!")
-            continue
-        match label:
-            case 1:
-                print("Enter the student name: ")
-                new_student(students)
-            case 2:
-                add_grades(students)
-            case 3:
-                avg_grades(students)
-            case 4:
-                if max_avg_student(students):
-                    print(f"The student with the highest average is {max_avg_student(students).capitalize()} with a grade of {max_avg_grade(students)}")
-                else:
-                    print("{Your students have no grades!")
-            case 5:
-                quit("Leaving program")
+            print("Please enter a valid number!")
+        except KeyboardInterrupt:
+            print("\nProgram interrupted. Exiting...")
+            break
 
 
 if __name__ == "__main__":
