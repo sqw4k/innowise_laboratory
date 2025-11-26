@@ -10,23 +10,12 @@ def find_student(students_list, student_name):
     return result
 
 
-def find_student_index(students_list, student_data):
-    # Check for empty lists
-    if not students_list or not student_data:
-        return -1
-    for index, existing_student in enumerate(students_list):
-        if existing_student == student_data:
-            return index
-    return -1
-
-
 def new_student(students_list):
     student_name = input("Enter student name: ").strip()
     if not student_name:
         print("Student name cannot be empty!")
         return
 
-    # Check if student already exists before adding
     if find_student(students_list, student_name):
         print("Student already exists!")
     else:
@@ -59,7 +48,6 @@ def add_grades(students_list):
                 break
             try:
                 current_grade = int(grade)
-                # Validate grade range
                 if 0 <= current_grade <= 100:
                     student_data["student_grade"].append(current_grade)
                     print(f"Grade {current_grade} added successfully!")
@@ -71,15 +59,23 @@ def add_grades(students_list):
         print("Student doesn't exist!")
 
 
+def calculate_averages(students_list):
+    # Calculate averages for all students
+    for student in students_list:
+        grades = student["student_grade"]
+        if grades:
+            student["student_avg"] = sum(grades) / len(grades)
+        else:
+            student["student_avg"] = "N/A"
+
+
 def max_avg_grade(students_list):
-    # Check for empty student list
     if not students_list:
         return None
-    # Filter students with valid grades
     students_with_grades = [
         student for student in students_list
-        if student.get("student_avg") != "N/A"
-           and isinstance(student.get("student_avg"), (int, float))
+        if student.get("student_avg", "N/A") != "N/A"
+           and isinstance(student.get("student_avg", "N/A"), (int, float))
     ]
     if not students_with_grades:
         return None
@@ -92,8 +88,8 @@ def max_avg_student(students_list):
         return None
     students_with_grades = [
         student for student in students_list
-        if student.get("student_avg") != "N/A"
-           and isinstance(student.get("student_avg"), (int, float))
+        if student.get("student_avg", "N/A") != "N/A"
+           and isinstance(student.get("student_avg", "N/A"), (int, float))
     ]
     if not students_with_grades:
         return None
@@ -106,8 +102,8 @@ def min_avg_grade(students_list):
         return None
     students_with_grades = [
         student for student in students_list
-        if student.get("student_avg") != "N/A"
-           and isinstance(student.get("student_avg"), (int, float))
+        if student.get("student_avg", "N/A") != "N/A"
+           and isinstance(student.get("student_avg", "N/A"), (int, float))
     ]
     if not students_with_grades:
         return None
@@ -118,45 +114,35 @@ def min_avg_grade(students_list):
 def overall_grade(students_list):
     if not students_list:
         return None
-    students_with_grades = [
-        student for student in students_list
-        if student.get("student_avg") != "N/A"
-           and isinstance(student.get("student_avg"), (int, float))
-    ]
-    if not students_with_grades:
+
+    all_grades = []
+    for student in students_list:
+        all_grades.extend(student.get("student_grade", []))
+
+    if not all_grades:
         return None
 
-    # Calculate overall average across all students
-    total_sum = 0
-    for student in students_with_grades:
-        total_sum += student["student_avg"]
-
-    try:
-        return total_sum / len(students_with_grades)
-    except ZeroDivisionError:
-        return None
+    return sum(all_grades) / len(all_grades)
 
 
 def avg_grades(students_list):
-    # Check if there are students to generate report for
     if not students_list:
         print("No students available!")
         return
 
+    # Calculate averages before generating report
+    calculate_averages(students_list)
+
     print("--- Student Report ---")
 
-    # Calculate and display average grades for each student
     for student_data in students_list:
-        student_grades = student_data["student_grade"]
+        avg = student_data.get("student_avg", "N/A")
+        name = student_data["student_name"].capitalize()
 
-        if not student_grades:
-            student_data["student_avg"] = "N/A"
-            print(f"{student_data['student_name'].capitalize()}'s average grade is N/A")
+        if avg == "N/A":
+            print(f"{name}'s average grade is N/A")
         else:
-            # Calculate average grade
-            average = sum(student_grades) / len(student_grades)
-            student_data["student_avg"] = average
-            print(f"{student_data['student_name'].capitalize()}'s average grade is {average:.1f}")
+            print(f"{name}'s average grade is {avg:.1f}")
 
     print("------------------------")
 
@@ -173,7 +159,6 @@ def main():
     students = []
 
     while True:
-        # Main program menu
         print("\n-------- Student Grade Analyzer -----------")
         print("1. Add a new student")
         print("2. Add grades for a student")
@@ -196,7 +181,6 @@ def main():
             print("Invalid choice!")
             continue
 
-        # Handle user selection
         match choice:
             case 1:
                 new_student(students)
@@ -208,6 +192,8 @@ def main():
                 if not students:
                     print("No students available!")
                 else:
+                    # Calculate averages before finding top student
+                    calculate_averages(students)
                     top_student_name = max_avg_student(students)
                     top_grade_value = max_avg_grade(students)
                     if top_student_name and top_grade_value is not None:
