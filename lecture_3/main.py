@@ -1,4 +1,4 @@
-def find_student(students_list, student_name):
+def find_student(students_list: list[dict], student_name: str) -> dict | None:
     # Check for empty input data
     if not student_name or not students_list:
         return None
@@ -10,7 +10,7 @@ def find_student(students_list, student_name):
     return result
 
 
-def new_student(students_list):
+def new_student(students_list: list[dict]) -> None:
     student_name = input("Enter student name: ").strip()
     if not student_name:
         print("Student name cannot be empty!")
@@ -27,7 +27,7 @@ def new_student(students_list):
         print(f"Student {student_name} added successfully!")
 
 
-def add_grades(students_list):
+def add_grades(students_list: list[dict]) -> None:
     # Check if there are any students in the system
     if not students_list:
         print("No students available! Add students first.")
@@ -59,7 +59,7 @@ def add_grades(students_list):
         print("Student doesn't exist!")
 
 
-def calculate_averages(students_list):
+def calculate_averages(students_list: list[dict]) -> None:
     # Calculate averages for all students
     for student in students_list:
         grades = student["student_grade"]
@@ -69,7 +69,7 @@ def calculate_averages(students_list):
             student["student_avg"] = "N/A"
 
 
-def max_avg_grade(students_list):
+def max_avg_grade(students_list: list[dict]) -> float | None:
     if not students_list:
         return None
     students_with_grades = [
@@ -83,7 +83,7 @@ def max_avg_grade(students_list):
     return max_student["student_avg"]
 
 
-def max_avg_student(students_list):
+def max_avg_student(students_list: list[dict]) -> str | None:
     if not students_list:
         return None
     students_with_grades = [
@@ -97,7 +97,7 @@ def max_avg_student(students_list):
     return max_student["student_name"]
 
 
-def min_avg_grade(students_list):
+def min_avg_grade(students_list: list[dict]) -> float | None:
     if not students_list:
         return None
     students_with_grades = [
@@ -111,7 +111,7 @@ def min_avg_grade(students_list):
     return min_student["student_avg"]
 
 
-def overall_grade(students_list):
+def overall_grade(students_list: list[dict]) -> float | None:
     if not students_list:
         return None
 
@@ -125,7 +125,7 @@ def overall_grade(students_list):
     return sum(all_grades) / len(all_grades)
 
 
-def avg_grades(students_list):
+def avg_grades(students_list: list[dict]) -> None:
     if not students_list:
         print("No students available!")
         return
@@ -155,7 +155,7 @@ def avg_grades(students_list):
     print(f"Overall Average: {overall_avg if overall_avg is not None else 'N/A'}")
 
 
-def main():
+def main() -> None:
     students = []
 
     while True:
